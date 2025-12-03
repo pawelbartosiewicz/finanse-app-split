@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinFlow - Dashboard Vue</title>
+    
+
+
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- 1. Import Vue.js (bez instalacji, prosto z chmury) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <style>
+
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1> hello, {{ user }} </h1>
+
+        
+    </div>
+
+    <!-- 3. Logika Vue -->
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            // --- DATA (Pamięć aplikacji) ---
+            // To tutaj trzymasz wszystkie zmienne. Vue śledzi je automatycznie.
+            data() {
+                return {
+                    user: 'Gościu',
+                    transactions: [],
+                    loading: false // Flaga: czy teraz pobieramy dane?
+                }
+            },
+
+            // --- METHODS (Funkcje) ---
+            // Tu piszesz funkcje, które coś robią (np. pobierają dane z API)
+            methods: {
+
+                    async pobierzDane() {
+                        this.loading = true; // Włączamy kręciołek
+
+                        try {
+                            console.log("Wysyłam zapytanie do API...");
+
+                            // 1. Prawdziwe zapytanie do Twojego Flaska
+                            // Upewnij się, że adres IP i port są poprawne (jeśli hostujesz lokalnie)
+                            const response = await fetch('http://127.0.0.1:5000/api/stocks/MSFT');
+
+                            // Sprawdzamy, czy serwer nie zwrócił błędu (np. 404 lub 500)
+                            if (!response.ok) {
+                                throw new Error(`Błąd sieci! Status: ${response.status}`);
+                            }
+
+                            // 2. Dekodujemy JSON
+                            const data = await response.json();
+
+
+                            this.transactions = data; 
+                            // data.append(transactions)
+                            // console.log("transactions: ", this.transactions.stocks_info);
+
+
+                            // console.log(data.stocks_info.analyst_price_targets.median);
+                            // 3. Przypisanie danych
+                            // UWAGA: Twój JSON to { "lista": [...] }, więc musimy wejść w .lista
+                            
+
+                            // 4. Opcjonalnie: Obliczamy saldo, bo API go nie zwraca wprost
+                            // (Zakładam prostą logikę: przychód dodaje, wydatek odejmuje)
+
+                        } catch (error) {
+                            console.error("Błąd pobierania:", error);
+                            alert("Nie udało się połączyć z API! Sprawdź, czy Flask działa.");
+                        } finally {
+                            console.log(this.transactions);
+                            this.loading = false; // Wyłączamy kręciołek zawsze
+                        }
+                    },
+
+ 
+
+
+                // Funkcja pomocnicza do ładnego formatowania liczb
+                formatMoney(value) {
+                    return value.toFixed(2);
+                }
+            },
+
+            // --- MOUNTED (Start silnika) ---
+            // Ta funkcja uruchamia się SAMOCZYNNIE w momencie, gdy strona się załaduje.
+            mounted() {
+                // Od razu po wejściu na stronę chcemy pobrać dane
+                this.pobierzDane(); 
+            }
+
+        }).mount('#app'); // <--- TUTAJ MONTUJEMY APLIKACJĘ
+    </script>
+</body>
+</html>
