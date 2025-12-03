@@ -37,7 +37,7 @@ class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # Klucz obcy - łączy transakcję z id użytkownika
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    
+    ticker = db.Column(db.String(50), nullable=True)
     category = db.Column(db.String(50), nullable=False)
     op_type = db.Column(db.String(20), nullable=False)  
     amount = db.Column(db.Float, nullable=False)        
@@ -48,3 +48,19 @@ class Transaction(db.Model):
 
     def __repr__(self):
         return f'<Transaction {self.id} - User {self.user_id} - Category { self.category } - Operation Type {self.op_type} - Amount {self.amount} - Currency {self.currency}>'
+    
+
+class Portfolio(db.Model):
+    __tablename__ = 'portfolio'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    ticker = db.Column(db.String(10), nullable=False)
+    quantity = db.Column(db.Float, nullable=False)        
+    avg_buy_price = db.Column(db.Float, nullable=False)   
+    currency = db.Column(db.String(3), nullable=False)   
+    createdAt = db.Column(db.DateTime, default=datetime.utcnow)
+    updatedAt = db.Column(db.DateTime, nullable=True)
+
+    def __repr__(self):
+        return f'<Portfolio {self.id} - User {self.user_id} - Ticker { self.ticker } - Quantity {self.quantity} - Average Price {self.avg_buy_price} - Currency {self.currency}> - UpdatedAt { self.updatedAt }'

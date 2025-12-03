@@ -32,6 +32,7 @@
             <button v-show="userLoggedIn" v-if="userLoggedIn" style="padding: 10px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer;">Wyloguj</button>
             <button v-else style="padding: 10px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer;">Zaloguj się</button>
             <button style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">+ Nowa transakcja</button>
+            <button @click="postRequest">Test!</button>
             <button @click="darkMode" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">Dark mode</button>
         </div>
     </header>
@@ -138,6 +139,31 @@
             </table>
         </div>
 
+            <div id="testForm">
+
+                <form @submit.prevent="buyStock">
+                    <input v-model="form.ticker" type="text" placeholder="Stock name, e.g. MSFT" required>
+                    <input v-model.number="form.quantity" type="number" placeholder="How many stocks, e.g. 50" required>
+                    <input v-model.number="form.buy_price" type="number" placeholder="Asset price, e.g. 25" required>
+                    <input v-model="form.currency" type="text" placeholder="Currency, e.g. USD" required>
+                    
+                    <button>submit me</button>
+                    <p v-if="message" :style="{ color: isError ? 'red' : 'green' }">{{ message }}</p>
+                    
+                    
+
+                </form>
+                
+
+                <h1>Wyslij form</h1>
+                
+            </div>
+
+
+
+
+
+
     </div>
     </div>
 
@@ -150,10 +176,21 @@
     createApp({
         data() {
             return {
+                
                 userLoggedIn: true,
                 darkModeToggle : true,
-                // --- TUTAJ SĄ DANE PRZYKŁADOWE (MOCK DATA) ---
+
                 transactions : [],
+                stocksData : [],
+                stocksToCheck : 'MSFT',
+
+                form: {
+                    ticker: '',
+                    quantity: 0,
+                    buy_price: 0,
+                    currency: ''
+                },
+
                 // Obliczane saldo
                 saldo: 0, 
 
@@ -164,78 +201,40 @@
                 // Dane walutowe "na sztywno"
                 currency: { text_name: "Dolar amerykański", name: 'USD', rate: 4.1256, date: '2025-11-26'},
 
-                // Lista transakcji
 
-
-
-                // transakcje: [ symulacja z api
-                //     { 
-                //         id: 1, 
-                //         description: "Wypłata Wynagrodzenia", 
-                //         category: "salary", 
-                //         amount: 8500.00, 
-                //         currency: "PLN", 
-                //         op_type: "income", 
-                //         date: "26.11.2025" 
-                //     },
-                //     { 
-                //         id: 2, 
-                //         description: "Netflix Premium", 
-                //         category: "bills", 
-                //         amount: 60.00, 
-                //         currency: "PLN", 
-                //         op_type: "expense", 
-                //         date: "25.11.2025" 
-                //     },
-                //     { 
-                //         id: 3, 
-                //         description: "Zakupy w Biedronce", 
-                //         category: "food", 
-                //         amount: 145.50, 
-                //         currency: "PLN", 
-                //         op_type: "expense", 
-                //         date: "24.11.2025" 
-                //     },
-                //     { 
-                //         id: 4, 
-                //         description: "Uber Bolt", 
-                //         category: "transport", 
-                //         amount: 25.90, 
-                //         currency: "PLN", 
-                //         op_type: "expense", 
-                //         date: "24.11.2025" 
-                //     },
-                //     { 
-                //         id: 5, 
-                //         description: "Nowe Słuchawki", 
-                //         category: "shopping", 
-                //         amount: 399.00, 
-                //         currency: "PLN", 
-                //         op_type: "expense", 
-                //         date: "22.11.2025" 
-                //     },
-                //     { 
-                //         id: 6, 
-                //         description: "Zwrot podatku", 
-                //         category: "salary", 
-                //         amount: 450.00, 
-                //         currency: "PLN", 
-                //         op_type: "income", 
-                //         date: "20.11.2025" 
-                //     },
-                //     { 
-                //         id: 7, 
-                //         description: "Czynsz Mieszkanie", 
-                //         category: "bills", 
-                //         amount: 2400.00, 
-                //         currency: "PLN", 
-                //         op_type: "expense", 
-                //         date: "10.11.2025" 
-                //     }
-                // ]
             }
         },
         methods: {
+
+            async buyStock() {
+                    this.message = "Wysyłanie...";
+                    this.isError = false;
+
+                    try {
+                        const res = await fetch('http://127.0.0.1:5000/api/addStocks', { 
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.form)
+                        });
+
+                        const data = await res.json();
+                        this.form = {
+                            ticker: '',
+                            quantity: null,
+                            buy_price: null,
+                            currency: ''
+                        };
+                        console.log(data);
+
+
+                    } catch (err) {
+                        this.isError = true;
+                        this.message = "Błąd sieci: " + err.message;
+                    }
+
+                },
+
+                
             async getTransactions(){
             try {
                 const response = await fetch("http://127.0.0.1:5000/api/showTransactions");
@@ -256,6 +255,43 @@
 
 
 
+
+        },
+
+        async getStocks(){
+            try {
+                const response = await fetch("http://127.0.0.1:5000/api/stocks/MSFT");
+
+                if (!response.ok) {
+                    throw new Error(`Błąd sieci! Status: ${response.status}`);
+                }
+
+                response_json = await response.json();
+                this.stocksData = response_json.stocks_info;
+                console.log("Transactions data", response_json.stocks_info.info.currentPrice)
+                
+
+
+            } catch (error) {
+                console.log("Error fetching transactions:", error);
+            }
+
+        },
+
+
+        postRequest(){
+            fetch("http://127.0.0.1:5000/api/addStocks", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ ticker: "MSFT", quantity: 5, currency: "USD", buy_price: 150 })
+            })
+            .then(response => response.json())
+            .then(message => {
+                console.log("Response from server:", message);
+            })
+ 
 
         },
 
@@ -304,6 +340,7 @@
             // Po załadowaniu strony obliczamy saldo na podstawie danych
             this.obliczSaldoStartowe();
             this.getTransactions();
+            this.getStocks();
         }
     }).mount('#app');
 </script>
