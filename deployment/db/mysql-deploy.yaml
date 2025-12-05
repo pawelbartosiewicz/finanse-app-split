@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: mysql
 spec:
-  replicas: 1           # Bazy SQL (Master) zazwyczaj trzymamy pojedynczo (bez klastrowania na start)
+  replicas: 1          
   selector:
     matchLabels:
       app: mysql
@@ -14,11 +14,10 @@ spec:
     spec:
       containers:
       - name: mysql
-        image: mysql:8.0   # Lub mysql:5.7 (zależy co lubisz)
+        image: mysql:8.0   
         ports:
         - containerPort: 3306
         env:
-        # Konfiguracja MySQL przez zmienne środowiskowe (mapowane z Secreta)
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -39,7 +38,6 @@ spec:
             secretKeyRef:
               name: mysql-secret
               key: db-password
-        # Montowanie dysku (To sprawia, że dane przeżyją restart)
         volumeMounts:
         - name: mysql-storage
           mountPath: /var/lib/mysql
@@ -52,7 +50,7 @@ kind: Deployment
 metadata:
   name: mysql
 spec:
-  replicas: 1           # Bazy SQL (Master) zazwyczaj trzymamy pojedynczo (bez klastrowania na start)
+  replicas: 1           
   selector:
     matchLabels:
       app: mysql
@@ -63,11 +61,10 @@ spec:
     spec:
       containers:
       - name: mysql
-        image: mysql:8.0   # Lub mysql:5.7 (zależy co lubisz)
+        image: mysql:8.0 
         ports:
         - containerPort: 3306
         env:
-        # Konfiguracja MySQL przez zmienne środowiskowe (mapowane z Secreta)
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -88,7 +85,6 @@ spec:
             secretKeyRef:
               name: mysql-secret
               key: db-password
-        # Montowanie dysku (To sprawia, że dane przeżyją restart)
         volumeMounts:
         - name: mysql-storage
           mountPath: /var/lib/mysql

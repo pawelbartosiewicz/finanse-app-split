@@ -4,7 +4,7 @@ metadata:
   name: mysql-pvc
 spec:
   accessModes:
-    - ReadWriteOnce   # Tylko jeden pod może tu pisać naraz (logiczne dla SQL)
+    - ReadWriteOnce 
   resources:
     requests:
-      storage: 2Gi    # Rozmiar dysku
+      storage: 2Gi    
