@@ -1,0 +1,10 @@
+flask
+flask_sqlalchemy
+flask_login
+dotenv
+pymysql 
+cryptography
+flask_migrate
+flask_cors
+yfinance
+requests

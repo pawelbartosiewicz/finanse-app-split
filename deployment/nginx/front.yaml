@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: test-nginx
+  name: test-nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test-nginx
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: test-nginx
+    spec:
+      containers:
+      - image: pawelbartosiewicz/finanse-front:v0
+        name: finanse-front
+        imagePullPolicy: Always
+        resources: {}
+status: {}

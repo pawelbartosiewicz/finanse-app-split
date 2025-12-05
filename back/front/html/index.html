@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinFlow - Demo Dashboard</title>
+    
+    <!-- Biblioteki -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+
+    
+</head>
+<body>
+
+<div id="app">
+    
+    <div v-if="!userLoggedIn" class="login-container">
+        <h2>Zaloguj się</h2>
+        <input v-model="loginInput" placeholder="Login">
+        <input type="password" placeholder="Hasło">
+        <button @click="zalogujSie">Wejdź</button>
+    </div>
+
+    <div v-else class="container">
+            <!-- 1. GŁÓWNY NAGŁÓWEK -->
+    <header style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="margin:0; color: var(--primary);">FinFlow Dashboard</h2>
+        <div style="display: flex; gap: 10px;">
+            <button v-show="userLoggedIn" v-if="userLoggedIn" style="padding: 10px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer;">Wyloguj</button>
+            <button v-else style="padding: 10px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer;">Zaloguj się</button>
+            <button @click="currentView =='addStocks'" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">+ Nowa transakcja</button>
+            <button @click="postRequest">Test!</button>
+            <button @click="darkMode" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">Dark mode</button>
+        </div>
+    </header>
+<i class="fa-solid fa-sack-dollar"></i><i class="fa-solid fa-sack-dollar"></i><i class="fa-solid fa-sack-dollar"></i><i class="fa-solid fa-sack-dollar"></i>
+    <!-- 2. SEKcja SALDA -->
+    <div class="balance-header">
+        <div class="balance-title">Dostępne środki</div>
+        <div class="balance-value">{{ formatMoney(saldo) }} PLN</div>
+        <div class="balance-diff">
+            <i class="fa-solid fa-arrow-trend-up"></i> +2,450.00 PLN w tym miesiącu
+        </div>
+    </div>
+        {{currentView}}
+    <div v-if="currentView === 'portfolio'" class="dashboard-grid">
+          
+        <!-- LEWA KOLUMNA (WIDGETY) -->
+        <div class="sidebar">
+            
+            <!-- Widget Giełdowy -->
+            <div class="card">
+                <div class="widget-title"><i class="fa-solid fa-chart-line"></i> Twój Portfel</div>
+                
+                <!-- Mock Data Item 1 -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="font-weight: bold;">{{ stock1.symbol }}</span>
+                        <span style="color: #64748b;">Akcje</span>
+                    </div>
+                    <div class="stock-display">
+                        <div class="stock-price">{{ stock1.price }} $</div>
+                        <div class="change-badge" :class="stock1.change >= 0 ? 'up' : 'down'">
+                            {{ stock1.change }}%
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 15px 0;">
+
+                <!-- Mock Data Item 2 -->
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="font-weight: bold;">{{ stock2.symbol }}</span>
+                        <span style="color: #64748b;">Krypto</span>
+                    </div>
+                    <div class="stock-display">
+                        <div class="stock-price">{{ stock2.price }} $</div>
+                        <div class="change-badge" :class="stock2.change >= 0 ? 'up' : 'down'">
+                            {{ stock2.change }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Widget Walutowy -->
+            <div class="card">
+                <div class="widget-title"><i class="fa-solid fa-coins"></i> Kursy NBP</div>
+                <div style="text-align: center; padding: 10px; background: #f8fafc; border-radius: 12px;">
+                    <div style="font-size: 0.9rem; color: #64748b;">{{ currency.text_name }}</div>
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">{{ currency.rate }} zł</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">{{ currency.date }}</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- PRAWA KOLUMNA (TABELA) -->
+        <div class="main-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin:0;">Ostatnie operacje</h3>
+                <a href="#" style="color: var(--accent); text-decoration: none; font-size: 0.9rem; font-weight: 600;">Zobacz wszystkie</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px;"></th>
+                        <th>Opis transakcji</th>
+                        <th>Data</th>
+                        <th style="text-align: right;">Kwota</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="t in transactions" :key="t.id">
+                        <td>
+                            <!-- Dynamiczna klasa ikony -->
+                            <div class="icon-box" :class="'cat-' + t.category">
+                                <i class="fa-solid" :class="getIcon(t.category)"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; color: var(--primary);">{{ t.description }}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">{{ t.category.toUpperCase() }}</div>
+                        </td>
+                        <td style="color: #64748b; font-size: 0.9rem;">
+                            {{ t.date }}
+                        </td>
+                        <td style="text-align: right;">
+                            <div :class="t.op_type === 'income' ? 'amount-plus' : 'amount-minus'">
+                                {{ t.op_type === 'income' ? '+' : '-' }}{{ formatMoney(t.amount) }} {{ t.currency }}
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+ <div v-if="currentView === 'addStocks'" id="testForm">
+		{{ currentView }} 
+                <form @submit.prevent="buyStock">
+                    <input v-model="form.ticker" type="text" placeholder="Stock name, e.g. MSFT" required>
+                    <input v-model.number="form.quantity" type="number" placeholder="How many stocks, e.g. 50" required>
+                    <input v-model.number="form.buy_price" type="number" placeholder="Asset price, e.g. 25" required>
+                    <input v-model="form.currency" type="text" placeholder="Currency, e.g. USD" required>
+                    
+                    <button>submit me</button>
+                    <p v-if="message" :style="{ color: isError ? 'red' : 'green' }">{{ message }}</p>
+                    
+                    
+
+                </form>
+                
+
+                <h1>Wyslij form</h1>
+                
+            </div>
+
+        </div>
+	{{ currentView }} 
+           
+
+
+
+          
+
+
+    </div>
+    </div>
+
+
+</div>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                currentView : 'portfolio',
+                userLoggedIn: true,
+                darkModeToggle : true,
+                message: '',
+
+
+
+                transactions : [],
+                stocksData : [],
+                stocksToCheck : 'MSFT',
+                
+                form: {
+                    ticker: '',
+                    quantity: 0,
+                    buy_price: 0,
+                    currency: ''
+                },
+
+                // Obliczane saldo
+                saldo: 0, 
+
+                // Dane giełdowe "na sztywno"
+                stock1: { symbol: 'AAPL', price: 189.45, change: 1.25 },
+                stock2: { symbol: 'BTC', price: 95430.00, change: -0.85 },
+                
+                // Dane walutowe "na sztywno"
+                currency: { text_name: "Dolar amerykański", name: 'USD', rate: 4.1256, date: '2025-11-26'},
+
+
+            }
+        },
+        methods: {
+
+            async buyStock() {
+                    this.message = "Wysyłanie...";
+                    this.isError = false;
+
+                    try {
+                        const res = await fetch('http://127.0.0.1:5000/api/addStocks', { 
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.form)
+                        });
+
+                        const data = await res.json();
+                        this.form = {
+                            ticker: '',
+                            quantity: null,
+                            buy_price: null,
+                            currency: ''
+                        };
+                        this.message = '';
+                        console.log(data);
+
+
+                    } catch (err) {
+                        this.isError = true;
+                        this.message = "Błąd sieci: " + err.message;
+                    }
+
+                },
+
+                
+            async getTransactions(){
+            try {
+                const response = await fetch("http://127.0.0.1:5000/api/showTransactions");
+
+                if (!response.ok) {
+                    throw new Error(`Błąd sieci! Status: ${response.status}`);
+                }
+
+                response_json = await response.json();
+                this.transactions = response_json.data;
+                console.log("Transactions data", response_json.data)
+                
+
+
+            } catch (error) {
+                console.log("Error fetching transactions:", error);
+            }
+
+
+
+
+        },
+
+        async getStocks(){
+            try {
+                const response = await fetch("http://127.0.0.1:5000/api/stocks/MSFT");
+
+                if (!response.ok) {
+                    throw new Error(`Błąd sieci! Status: ${response.status}`);
+                }
+
+                response_json = await response.json();
+                this.stocksData = response_json.stocks_info;
+                console.log("Transactions data", response_json.stocks_info.info.currentPrice)
+                
+
+
+            } catch (error) {
+                console.log("Error fetching transactions:", error);
+            }
+
+        },
+
+
+        postRequest(){
+            fetch("http://127.0.0.1:5000/api/addStocks", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ ticker: "MSFT", quantity: 5, currency: "USD", buy_price: 150 })
+            })
+            .then(response => response.json())
+            .then(message => {
+                console.log("Response from server:", message);
+            })
+ 
+
+        },
+
+
+            formatMoney(value) {
+                return parseFloat(value).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            },
+            getIcon(category) {
+                const icons = {
+                    'salary': 'fa-sack-dollar',
+                    'bills': 'fa-file-invoice',
+                    'food': 'fa-utensils',
+                    'transport': 'fa-car',
+                    'shopping': 'fa-bag-shopping'
+                };
+                return icons[category] || 'fa-wallet';
+            },
+            obliczSaldoStartowe() {
+                // Prosta symulacja salda: startujemy z 10k i odejmujemy/dodajemy historię
+                let suma = 5000; // Saldo początkowe (np. z poprzedniego miesiąca)
+                
+                this.transactions.forEach(t => {
+                    if(t.op_type === 'income') suma += t.amount;
+                    else suma -= t.amount;
+                });
+                
+                this.saldo = suma;
+            },
+
+            darkMode(){
+                this.darkModeToggle = !this.darkModeToggle;
+                if(this.darkModeToggle){
+                    document.body.classList.remove('dark-mode');
+
+                } else {
+                    document.body.classList.add('dark-mode');
+                }
+            }
+
+
+        },
+
+
+        mounted() {
+	        this.darkMode();
+            // Po załadowaniu strony obliczamy saldo na podstawie danych
+            this.obliczSaldoStartowe();
+            this.getTransactions();
+            this.getStocks();
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: finanse-backend
+  name: finanse-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: finanse-backend
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: finanse-backend
+    spec:
+      containers:
+      - image: pawelbartosiewicz/finanse-back:v1
+        name: finanse-back
+        imagePullPolicy: Always
+        resources: {}
+        ports:
+           - containerPort: 5000
+status: {}
