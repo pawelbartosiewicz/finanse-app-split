@@ -16,7 +16,8 @@ migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@10.0.30.10:3306/finanse_db_dev"
+    # app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///finanse_db_dev.sqlite3"
+    # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@10.0.30.10:3306/finanse_db_dev"
     app.config['SECRET_KEY'] = 'super'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
