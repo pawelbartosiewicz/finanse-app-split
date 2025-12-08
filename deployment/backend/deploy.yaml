@@ -19,6 +19,12 @@ spec:
     spec:
       containers:
       - image: pawelbartosiewicz/finanse-back:v1
+        env:
+        - name: DATABASE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: database-connection
+              key: connection-string
         name: finanse-back
         imagePullPolicy: Always
         resources: {}

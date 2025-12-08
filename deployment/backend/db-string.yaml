@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: database-connection
+type: Opaque
+stringData:
+  connection-string: "mysql+pymysql://root:root@10.0.30.10:3306/finanse_db_dev"
